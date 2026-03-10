@@ -55,6 +55,9 @@ export function AdminParticipantsView() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
+  const [filterRole, setFilterRole] = useState<string>("ALL");
+  const [filterVoted, setFilterVoted] = useState<string>("all");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const itemsPerPage = 10;
 
   const { data, isLoading } = useParticipants({
@@ -63,6 +66,9 @@ export function AdminParticipantsView() {
     search: searchQuery,
     sortBy: sortConfig?.key || "createdAt",
     sortOrder: sortConfig?.direction || "desc",
+    ...(filterRole !== "ALL" && { role: filterRole }),
+    ...(filterVoted === "voted" && { hasVoted: true }),
+    ...(filterVoted === "pending" && { hasVoted: false }),
   });
   const participantsList = data?.data || [];
   const meta = data?.meta;
@@ -243,6 +249,15 @@ export function AdminParticipantsView() {
       direction = 'desc';
     }
     setSortConfig({ key, direction });
+    setCurrentPage(1);
+  };
+
+  const activeFilterCount = (filterRole !== "ALL" ? 1 : 0) + (filterVoted !== "all" ? 1 : 0);
+
+  const resetFilters = () => {
+    setFilterRole("ALL");
+    setFilterVoted("all");
+    setCurrentPage(1);
   };
 
   const totalPages = meta?.totalPages || 0;
@@ -379,12 +394,70 @@ export function AdminParticipantsView() {
               placeholder="Search by name, NIM..." 
               className="pl-9 border-blue-100 focus:border-primary focus:ring-primary/20 bg-blue-50/30"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
             />
           </div>
-          <Button variant="outline" size="sm" className="border-blue-200 text-slate-600 hover:text-primary hover:bg-blue-50">
-            <Filter className="w-4 h-4 mr-2" /> Filter
-          </Button>
+          <div className="relative flex items-center gap-2">
+            {activeFilterCount > 0 && (
+              <button
+                onClick={resetFilters}
+                className="text-xs text-primary font-bold hover:underline cursor-pointer"
+              >
+                Reset ({activeFilterCount})
+              </button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsFilterOpen(v => !v)}
+              className={`cursor-pointer transition-colors ${
+                activeFilterCount > 0
+                  ? "text-primary bg-blue-50 border-blue-400 font-bold hover:bg-blue-100"
+                  : "border-blue-200 text-slate-600 hover:text-primary hover:bg-blue-50"
+              }`}
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              Filter
+              {activeFilterCount > 0 && (
+                <span className="ml-2 w-5 h-5 rounded-full bg-primary text-white text-[10px] font-black flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+
+            {/* Floating dropdown */}
+            {isFilterOpen && (
+              <div className="absolute top-full right-0 mt-2 z-20 bg-white border border-blue-100 rounded-xl shadow-xl p-4 flex flex-col gap-4 min-w-[220px] animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-blue-900 uppercase tracking-wider">Role</label>
+                  <Select value={filterRole} onValueChange={(v) => { setFilterRole(v); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-8 text-xs border-blue-200 rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Roles</SelectItem>
+                      <SelectItem value="POI">POI</SelectItem>
+                      <SelectItem value="OFFICER">OFFICER</SelectItem>
+                      <SelectItem value="ADMIN">ADMIN</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-blue-900 uppercase tracking-wider">Vote Status</label>
+                  <Select value={filterVoted} onValueChange={(v) => { setFilterVoted(v); setCurrentPage(1); }}>
+                    <SelectTrigger className="h-8 text-xs border-blue-200 rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="voted">Voted</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="p-0 overflow-auto">
           <Table>

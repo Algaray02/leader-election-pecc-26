@@ -9,8 +9,11 @@ export async function GET(request: Request) {
     const search = searchParams.get("search") || "";
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
-    
-    const result = await listParticipants({ page, limit, search, sortBy, sortOrder });
+    const role = searchParams.get("role") || undefined;
+    const hasVotedParam = searchParams.get("hasVoted");
+    const hasVoted = hasVotedParam === null ? undefined : hasVotedParam === "true";
+
+    const result = await listParticipants({ page, limit, search, sortBy, sortOrder, role, hasVoted });
     return successResponse(result.data, result.meta);
   } catch (error) {
     console.error("Error fetching participants:", error);
