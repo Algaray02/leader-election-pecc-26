@@ -16,7 +16,7 @@ const PARTICIPANT_SELECT = {
   createdAt: true,
 };
 
-export async function listParticipants({ page = 1, limit = 10, search = "", sortBy = "createdAt", sortOrder = "desc" }: { page?: number, limit?: number, search?: string, sortBy?: string, sortOrder?: string }) {
+export async function listParticipants({ page = 1, limit = 10, search = "", sortBy = "createdAt", sortOrder = "desc", role, hasVoted }: { page?: number, limit?: number, search?: string, sortBy?: string, sortOrder?: string, role?: string, hasVoted?: boolean }) {
   const skip = (page - 1) * limit;
 
   const where: any = {};
@@ -25,6 +25,12 @@ export async function listParticipants({ page = 1, limit = 10, search = "", sort
       { name: { contains: search, mode: "insensitive" } },
       { nim: { contains: search, mode: "insensitive" } },
     ];
+  }
+  if (role) {
+    where.role = role;
+  }
+  if (hasVoted !== undefined) {
+    where.hasVoted = hasVoted;
   }
 
   let orderBy: any = {};

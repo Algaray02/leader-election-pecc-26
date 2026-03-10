@@ -55,6 +55,9 @@ export function AdminParticipantsView() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
+  const [filterRole, setFilterRole] = useState<string>("ALL");
+  const [filterVoted, setFilterVoted] = useState<string>("all");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const itemsPerPage = 10;
 
   const { data, isLoading } = useParticipants({
@@ -63,6 +66,9 @@ export function AdminParticipantsView() {
     search: searchQuery,
     sortBy: sortConfig?.key || "createdAt",
     sortOrder: sortConfig?.direction || "desc",
+    ...(filterRole !== "ALL" && { role: filterRole }),
+    ...(filterVoted === "voted" && { hasVoted: true }),
+    ...(filterVoted === "pending" && { hasVoted: false }),
   });
   const participantsList = data?.data || [];
   const meta = data?.meta;
@@ -243,6 +249,15 @@ export function AdminParticipantsView() {
       direction = 'desc';
     }
     setSortConfig({ key, direction });
+    setCurrentPage(1);
+  };
+
+  const activeFilterCount = (filterRole !== "ALL" ? 1 : 0) + (filterVoted !== "all" ? 1 : 0);
+
+  const resetFilters = () => {
+    setFilterRole("ALL");
+    setFilterVoted("all");
+    setCurrentPage(1);
   };
 
   const totalPages = meta?.totalPages || 0;
@@ -253,15 +268,15 @@ export function AdminParticipantsView() {
     <div className="p-6 md:p-8 space-y-6">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-blue-900">Participant Management</h2>
-          <p className="text-sm text-slate-500 mt-1">Manage all registered voters and their status.</p>
+          <h2 className="text-3xl font-playfair font-black tracking-tight text-[#4A0E17]">Participant Management</h2>
+          <p className="text-sm text-[#6B4F43] mt-1">Manage all registered voters and their status.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex gap-2 w-full">
-            <Button variant="outline" onClick={handleExportExcel} className="cursor-pointer text-primary border-blue-200 hover:bg-blue-50 flex-1 sm:flex-none">
+            <Button variant="outline" onClick={handleExportExcel} className="cursor-pointer text-[#4A0E17] border-[#D4AF37]/40 hover:bg-[#D4AF37]/10 flex-1 sm:flex-none">
               <Download className="w-4 h-4 mr-2" /> Export
             </Button>
-            <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="cursor-pointer text-primary border-blue-200 hover:bg-blue-50 flex-1 sm:flex-none">
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="cursor-pointer text-[#4A0E17] border-[#D4AF37]/40 hover:bg-[#D4AF37]/10 flex-1 sm:flex-none">
               <Upload className="w-4 h-4 mr-2" /> Import
             </Button>
             <input 
@@ -274,49 +289,49 @@ export function AdminParticipantsView() {
           </div>
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
-              <Button className="cursor-pointer bg-primary text-white hover:bg-blue-800 shadow-md shadow-primary/20">
+              <Button className="cursor-pointer bg-[#4A0E17] text-white hover:bg-[#2D060C] shadow-md shadow-[#4A0E17]/20">
                 <UserPlus className="w-4 h-4 mr-2" /> Add User
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-106.25 rounded-2xl border-blue-50">
+            <DialogContent className="sm:max-w-106.25 rounded-2xl border-[#D4AF37]/20 bg-[#FFFDF9] text-[#4A0E17]">
               <form onSubmit={handleAddSubmit}>
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-blue-900">Add New Participant</DialogTitle>
+                  <DialogTitle className="text-2xl font-playfair font-black text-[#4A0E17]">Add New Participant</DialogTitle>
                   <DialogDescription>
                     Register a new voter for the election.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto px-1">
                   <div className="space-y-2">
-                    <Label htmlFor="new-name" className="text-blue-900 font-bold">Name</Label>
-                    <Input id="new-name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="E.g. John Doe" className="border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary rounded-xl" />
+                    <Label htmlFor="new-name" className="text-[#4A0E17] font-bold">Name</Label>
+                    <Input id="new-name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="E.g. John Doe" className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-nim" className="text-blue-900 font-bold">NIM</Label>
-                    <Input id="new-nim" required value={formData.nim} onChange={e => setFormData({...formData, nim: e.target.value})} placeholder="E.g. 4.33.24.X.XX" className="border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary rounded-xl" />
+                    <Label htmlFor="new-nim" className="text-[#4A0E17] font-bold">NIM</Label>
+                    <Input id="new-nim" required value={formData.nim} onChange={e => setFormData({...formData, nim: e.target.value})} placeholder="E.g. 4.33.24.X.XX" className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-password" className="text-blue-900 font-bold flex justify-between">
+                    <Label htmlFor="new-password" className="text-[#4A0E17] font-bold flex justify-between">
                        <span>Password</span>
-                       <button type="button" onClick={generatePassword} className="text-xs text-primary font-bold flex items-center gap-1 hover:underline cursor-pointer"><RefreshCw className="w-3 h-3"/> Generate</button>
+                       <button type="button" onClick={generatePassword} className="text-xs text-[#4A0E17] font-bold flex items-center gap-1 hover:underline cursor-pointer"><RefreshCw className="w-3 h-3"/> Generate</button>
                     </Label>
-                    <Input id="new-password" required type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="••••••••" className="border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary rounded-xl" />
+                    <Input id="new-password" required type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="••••••••" className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-email" className="text-blue-900 font-bold">Email (Optional)</Label>
-                    <Input id="new-email" type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="john@example.com" className="border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary rounded-xl" />
+                    <Label htmlFor="new-email" className="text-[#4A0E17] font-bold">Email (Optional)</Label>
+                    <Input id="new-email" type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="john@example.com" className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-phone" className="text-blue-900 font-bold">Phone (Optional)</Label>
-                    <Input id="new-phone" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+62 8..." className="border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary rounded-xl" />
+                    <Label htmlFor="new-phone" className="text-[#4A0E17] font-bold">Phone (Optional)</Label>
+                    <Input id="new-phone" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+62 8..." className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-role" className="text-blue-900 font-bold">Role</Label>
+                    <Label htmlFor="new-role" className="text-[#4A0E17] font-bold">Role</Label>
                     <Select value={formData.role} onValueChange={(val) => setFormData({ ...formData, role: val })}>
-                      <SelectTrigger id="new-role" className="border-slate-200 focus:ring-primary/20 focus:border-primary rounded-xl">
+                      <SelectTrigger id="new-role" className="border-[#D4AF37]/40 focus:ring-[#4A0E17]/20 focus:border-[#4A0E17] rounded-xl">
                         <SelectValue placeholder="Select a role" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl">
+                      <SelectContent className="rounded-xl bg-[#FFFDF9] border-[#D4AF37]/30">
                         <SelectItem value="POI">POI (PECC Officer Internship)</SelectItem>
                         <SelectItem value="OFFICER">OFFICER</SelectItem>
                         <SelectItem value="ADMIN">ADMIN (Full Access)</SelectItem>
@@ -325,7 +340,7 @@ export function AdminParticipantsView() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit" disabled={createParticipantMutation.isPending} className="w-full sm:w-auto font-bold rounded-xl bg-primary hover:bg-blue-800 text-white shadow-md">
+                  <Button type="submit" disabled={createParticipantMutation.isPending} className="w-full sm:w-auto font-bold rounded-xl bg-[#4A0E17] hover:bg-[#2D060C] text-white shadow-md">
                     {createParticipantMutation.isPending ? "Adding..." : "Add Participant"}
                   </Button>
                 </DialogFooter>
@@ -336,33 +351,33 @@ export function AdminParticipantsView() {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-blue-50 shadow-sm bg-white">
+        <Card className="border-[#D4AF37]/20 shadow-sm bg-[#FFFDF9]">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-500 font-medium">Total Participants</p>
-              <h3 className="text-2xl font-bold mt-1 text-blue-900">{totalItems}</h3>
+              <p className="text-sm text-[#6B4F43] font-medium">Total Participants</p>
+              <h3 className="text-2xl font-bold mt-1 text-[#4A0E17]">{totalItems}</h3>
             </div>
-            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-primary border border-blue-100">
+            <div className="w-12 h-12 bg-[#D4AF37]/10 rounded-full flex items-center justify-center text-[#4A0E17] border border-[#D4AF37]/30">
               <Users className="w-6 h-6" />
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-emerald-500 border-y-blue-50 border-r-blue-50 shadow-sm bg-white">
+        <Card className="border-l-4 border-l-emerald-500 border-y-[#D4AF37]/20 border-r-[#D4AF37]/20 shadow-sm bg-[#FFFDF9]">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
               <p className="text-sm text-emerald-600 font-medium">Voted</p>
-              <h3 className="text-2xl font-bold mt-1 text-emerald-700">{stats?.votedCount || 0} <span className="text-sm font-normal text-slate-500">Participants</span></h3>
+              <h3 className="text-2xl font-bold mt-1 text-emerald-700">{stats?.votedCount || 0} <span className="text-sm font-normal text-[#6B4F43]">Participants</span></h3>
             </div>
             <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 border border-emerald-100">
                <Vote className="w-6 h-6" />
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-red-400 border-y-blue-50 border-r-blue-50 shadow-sm bg-white">
+        <Card className="border-l-4 border-l-red-400 border-y-[#D4AF37]/20 border-r-[#D4AF37]/20 shadow-sm bg-[#FFFDF9]">
           <CardContent className="p-5 flex items-center justify-between">
             <div>
               <p className="text-sm text-red-500 font-medium">Not Voted</p>
-              <h3 className="text-2xl font-bold mt-1 text-red-600">{stats?.remainingVotes || 0} <span className="text-sm font-normal text-slate-500">Participants</span></h3>
+              <h3 className="text-2xl font-bold mt-1 text-red-600">{stats?.remainingVotes || 0} <span className="text-sm font-normal text-[#6B4F43]">Participants</span></h3>
             </div>
             <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-red-500 border border-red-100">
               <Clock className="w-6 h-6" />
@@ -371,82 +386,145 @@ export function AdminParticipantsView() {
         </Card>
       </div>
 
-      <Card className="flex flex-col border-blue-50 shadow-sm bg-white">
-        <CardHeader className="p-5 border-b border-blue-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative w-full md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <Input 
-              placeholder="Search by name, NIM..." 
-              className="pl-9 border-blue-100 focus:border-primary focus:ring-primary/20 bg-blue-50/30"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      <Card className="flex flex-col border-[#D4AF37]/20 shadow-sm bg-[#FFFDF9]">
+        <CardHeader className="p-5 border-b border-[#D4AF37]/20">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Search */}
+            <div className="relative w-full md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B4F43]/70 w-4 h-4" />
+              <Input 
+                placeholder="Search by name, NIM..." 
+                className="pl-9 border-[#D4AF37]/30 focus:border-[#4A0E17] focus:ring-[#4A0E17]/20 bg-[#D4AF37]/5"
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+              />
+            </div>
+
+            {/* Filter button + dropdown anchored to the right */}
+            <div className="relative flex items-center gap-2">
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={resetFilters}
+                  className="text-xs text-[#5D0F1D] font-bold hover:underline cursor-pointer"
+                >
+                  Reset ({activeFilterCount})
+                </button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsFilterOpen(v => !v)}
+                className={`cursor-pointer transition-colors ${
+                  activeFilterCount > 0
+                    ? "text-[#4A0E17] bg-[#D4AF37]/10 border-[#D4AF37]/60 font-bold hover:bg-[#D4AF37]/20"
+                    : "border-[#D4AF37]/40 text-[#6B4F43] hover:text-[#4A0E17] hover:bg-[#D4AF37]/10"
+                }`}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filter
+                {activeFilterCount > 0 && (
+                  <span className="ml-2 w-5 h-5 rounded-full bg-[#5D0F1D] text-[#D4AF37] text-[10px] font-black flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+
+              {/* Floating dropdown panel */}
+              {isFilterOpen && (
+                <div className="absolute top-full right-0 mt-2 z-20 bg-[#FFFDF9] border border-[#D4AF37]/30 rounded-xl shadow-xl p-4 flex flex-col gap-4 min-w-[220px] animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-[#4A0E17] uppercase tracking-wider">Role</label>
+                    <Select value={filterRole} onValueChange={(v) => { setFilterRole(v); setCurrentPage(1); }}>
+                      <SelectTrigger className="h-8 text-xs border-[#D4AF37]/40 rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ALL">All Roles</SelectItem>
+                        <SelectItem value="POI">POI</SelectItem>
+                        <SelectItem value="OFFICER">OFFICER</SelectItem>
+                        <SelectItem value="ADMIN">ADMIN</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-[#4A0E17] uppercase tracking-wider">Vote Status</label>
+                    <Select value={filterVoted} onValueChange={(v) => { setFilterVoted(v); setCurrentPage(1); }}>
+                      <SelectTrigger className="h-8 text-xs border-[#D4AF37]/40 rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="voted">Voted</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-          <Button variant="outline" size="sm" className="border-blue-200 text-slate-600 hover:text-primary hover:bg-blue-50">
-            <Filter className="w-4 h-4 mr-2" /> Filter
-          </Button>
         </CardHeader>
         <CardContent className="p-0 overflow-auto">
           <Table>
-            <TableHeader className="bg-slate-50/50">
-              <TableRow className="border-blue-50">
-                <TableHead className="w-16 text-center text-slate-600 font-bold">
-                  <Button variant="ghost" onClick={() => handleSort('id')} className="font-bold px-0 hover:bg-transparent h-auto text-slate-600 cursor-pointer">
+            <TableHeader className="bg-[#D4AF37]/5">
+              <TableRow className="border-[#D4AF37]/20">
+                <TableHead className="w-16 text-center text-[#6B4F43] font-bold">
+                  <Button variant="ghost" onClick={() => handleSort('id')} className="font-bold px-0 hover:bg-transparent h-auto text-[#6B4F43] cursor-pointer">
                     ID <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
-                <TableHead className="text-slate-600 font-bold">
-                  <Button variant="ghost" onClick={() => handleSort('name')} className="font-bold px-0 hover:bg-transparent -ml-2 h-auto text-slate-600 cursor-pointer">
+                <TableHead className="text-[#6B4F43] font-bold">
+                  <Button variant="ghost" onClick={() => handleSort('name')} className="font-bold px-0 hover:bg-transparent -ml-2 h-auto text-[#6B4F43] cursor-pointer">
                     Name / NIM <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
-                <TableHead className="text-slate-600 font-bold">Contact Info</TableHead>
-                <TableHead className="text-slate-600 font-bold">Credentials</TableHead>
-                <TableHead className="text-center text-slate-600 font-bold">
-                  <Button variant="ghost" onClick={() => handleSort('role')} className="font-bold px-0 hover:bg-transparent h-auto text-slate-600 justify-center w-full cursor-pointer">
+                <TableHead className="text-[#6B4F43] font-bold">Contact Info</TableHead>
+                <TableHead className="text-[#6B4F43] font-bold">Credentials</TableHead>
+                <TableHead className="text-center text-[#6B4F43] font-bold">
+                  <Button variant="ghost" onClick={() => handleSort('role')} className="font-bold px-0 hover:bg-transparent h-auto text-[#6B4F43] justify-center w-full cursor-pointer">
                     Role <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
-                <TableHead className="text-center text-slate-600 font-bold">
-                  <Button variant="ghost" onClick={() => handleSort('hasVoted')} className="font-bold px-0 hover:bg-transparent h-auto text-slate-600 justify-center w-full cursor-pointer">
+                <TableHead className="text-center text-[#6B4F43] font-bold">
+                  <Button variant="ghost" onClick={() => handleSort('hasVoted')} className="font-bold px-0 hover:bg-transparent h-auto text-[#6B4F43] justify-center w-full cursor-pointer">
                     Voted <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
-                <TableHead className="text-center text-slate-600 font-bold">Actions</TableHead>
+                <TableHead className="text-center text-[#6B4F43] font-bold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                  <TableCell colSpan={7} className="text-center py-8 text-[#6B4F43]">
                     Memuat data partisipan...
                   </TableCell>
                 </TableRow>
               ) : participantsList.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                  <TableCell colSpan={7} className="text-center py-8 text-[#6B4F43]">
                     No participants found.
                   </TableCell>
                 </TableRow>
               ) : (
                 participantsList.map((p: any) => (
-                  <TableRow key={p.id} className="border-blue-50 hover:bg-blue-50/30">
-                    <TableCell className="text-center text-slate-500 text-xs font-mono truncate max-w-20" title={p.id}>{p.id}</TableCell>
+                  <TableRow key={p.id} className="border-[#D4AF37]/20 hover:bg-[#D4AF37]/5">
+                    <TableCell className="text-center text-[#6B4F43] text-xs font-mono truncate max-w-20" title={p.id}>{p.id}</TableCell>
                   <TableCell>
-                    <div className="font-medium text-slate-800">{p.name}</div>
-                    <div className="text-xs text-slate-500 font-mono mt-0.5">{p.nim}</div>
+                    <div className="font-medium text-[#4A0E17]">{p.name}</div>
+                    <div className="text-xs text-[#6B4F43] font-mono mt-0.5">{p.nim}</div>
                   </TableCell>
                   <TableCell>
-                    <div className="text-xs text-slate-600">{p.email}</div>
-                    <div className="text-xs text-slate-500 mt-1">{p.phone}</div>
+                    <div className="text-xs text-[#6B4F43]">{p.email}</div>
+                    <div className="text-xs text-[#6B4F43] mt-1">{p.phone}</div>
                   </TableCell>
                   <TableCell>
                     <div className="text-xs mt-1">
-                      <span className="text-slate-500">Pass:</span> <span className="font-mono text-slate-700">{p.plainPassword || "••••••••"}</span>
+                      <span className="text-[#6B4F43]">Pass:</span> <span className="font-mono text-[#4A0E17]">{p.plainPassword || "••••••••"}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="outline" className={p.role === "ADMIN" ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-blue-50 text-blue-600 border-blue-200"}>
+                    <Badge variant="outline" className={p.role === "ADMIN" ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-[#D4AF37]/10 text-[#4A0E17] border-[#D4AF37]/40"}>
                       {p.role}
                     </Badge>
                   </TableCell>
@@ -459,49 +537,49 @@ export function AdminParticipantsView() {
                     <div className="flex items-center justify-center gap-2">
                       <Dialog open={editingId === p.id} onOpenChange={(open) => !open && setEditingId(null)}>
                         <DialogTrigger asChild>
-                          <Button onClick={() => openEditModal(p)} variant="ghost" size="icon" className="cursor-pointer text-blue-600 hover:bg-blue-100 hover:text-blue-800">
+                          <Button onClick={() => openEditModal(p)} variant="ghost" size="icon" className="cursor-pointer text-[#4A0E17] hover:bg-[#D4AF37]/20 hover:text-[#5D0F1D]">
                             <FileEdit className="w-4 h-4" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-106.25 rounded-2xl border-blue-50">
+                        <DialogContent className="sm:max-w-106.25 rounded-2xl border-[#D4AF37]/20 bg-[#FFFDF9] text-[#4A0E17]">
                           <form onSubmit={(e) => handleEditSubmit(e, p.id)}>
                             <DialogHeader>
-                              <DialogTitle className="text-2xl font-bold text-blue-900">Edit Participant</DialogTitle>
+                              <DialogTitle className="text-2xl font-playfair font-black text-[#4A0E17]">Edit Participant</DialogTitle>
                               <DialogDescription>
                                 Update participant details. Leave password blank if not changing.
                               </DialogDescription>
                             </DialogHeader>
                             <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto px-1">
                               <div className="space-y-2">
-                                <Label htmlFor={`name-${p.id}`} className="text-blue-900 font-bold">Name</Label>
-                                <Input id={`name-${p.id}`} required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary rounded-xl" />
+                                <Label htmlFor={`name-${p.id}`} className="text-[#4A0E17] font-bold">Name</Label>
+                                <Input id={`name-${p.id}`} required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor={`nim-${p.id}`} className="text-blue-900 font-bold">NIM</Label>
-                                <Input id={`nim-${p.id}`} required value={formData.nim} onChange={e => setFormData({...formData, nim: e.target.value})} className="border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary rounded-xl" />
+                                <Label htmlFor={`nim-${p.id}`} className="text-[#4A0E17] font-bold">NIM</Label>
+                                <Input id={`nim-${p.id}`} required value={formData.nim} onChange={e => setFormData({...formData, nim: e.target.value})} className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor={`password-${p.id}`} className="text-blue-900 font-bold flex justify-between">
+                                <Label htmlFor={`password-${p.id}`} className="text-[#4A0E17] font-bold flex justify-between">
                                   <span>New Password (Optional)</span>
-                                  <button type="button" onClick={generatePassword} className="text-xs text-primary font-bold flex items-center gap-1 hover:underline cursor-pointer"><RefreshCw className="w-3 h-3"/> Generate</button>
+                                  <button type="button" onClick={generatePassword} className="text-xs text-[#4A0E17] font-bold flex items-center gap-1 hover:underline cursor-pointer"><RefreshCw className="w-3 h-3"/> Generate</button>
                                 </Label>
-                                <Input id={`password-${p.id}`} type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="Leave blank to keep current" className="border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary rounded-xl" />
+                                <Input id={`password-${p.id}`} type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="Leave blank to keep current" className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor={`email-${p.id}`} className="text-blue-900 font-bold">Email</Label>
-                                <Input id={`email-${p.id}`} type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary rounded-xl" />
+                                <Label htmlFor={`email-${p.id}`} className="text-[#4A0E17] font-bold">Email</Label>
+                                <Input id={`email-${p.id}`} type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor={`phone-${p.id}`} className="text-blue-900 font-bold">Phone</Label>
-                                <Input id={`phone-${p.id}`} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary rounded-xl" />
+                                <Label htmlFor={`phone-${p.id}`} className="text-[#4A0E17] font-bold">Phone</Label>
+                                <Input id={`phone-${p.id}`} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                               </div>
                               <div className="space-y-2">
-                                <Label htmlFor={`role-${p.id}`} className="text-blue-900 font-bold">Role</Label>
+                                <Label htmlFor={`role-${p.id}`} className="text-[#4A0E17] font-bold">Role</Label>
                                 <Select value={formData.role} onValueChange={(val) => setFormData({ ...formData, role: val })}>
-                                  <SelectTrigger id={`role-${p.id}`} className="border-slate-200 focus:ring-primary/20 focus:border-primary rounded-xl">
+                                  <SelectTrigger id={`role-${p.id}`} className="border-[#D4AF37]/40 focus:ring-[#4A0E17]/20 focus:border-[#4A0E17] rounded-xl">
                                     <SelectValue placeholder="Select a role" />
                                   </SelectTrigger>
-                                  <SelectContent className="rounded-xl">
+                                  <SelectContent className="rounded-xl bg-[#FFFDF9] border-[#D4AF37]/30">
                                     <SelectItem value="POI">POI (Participant of Interest)</SelectItem>
                                     <SelectItem value="OFFICER">OFFICER</SelectItem>
                                     <SelectItem value="ADMIN">ADMIN (Full Access)</SelectItem>
@@ -510,7 +588,7 @@ export function AdminParticipantsView() {
                               </div>
                             </div>
                             <DialogFooter>
-                              <Button type="submit" disabled={updateParticipantMutation.isPending} className="w-full sm:w-auto font-bold rounded-xl bg-primary hover:bg-blue-800 text-white shadow-md">
+                              <Button type="submit" disabled={updateParticipantMutation.isPending} className="w-full sm:w-auto font-bold rounded-xl bg-[#4A0E17] hover:bg-[#2D060C] text-white shadow-md">
                                 {updateParticipantMutation.isPending ? "Saving..." : "Save changes"}
                               </Button>
                             </DialogFooter>
@@ -524,15 +602,15 @@ export function AdminParticipantsView() {
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-2xl border-red-50">
+                        <AlertDialogContent className="rounded-2xl border-red-100 bg-[#FFFDF9]">
                           <AlertDialogHeader>
                             <AlertDialogTitle className="text-red-600 font-bold text-xl">Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription className="text-slate-600">
+                            <AlertDialogDescription className="text-[#6B4F43]">
                               This action cannot be undone. This will permanently delete the participant <strong className="text-slate-900">{p.name} ({p.nim})</strong>.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel className="rounded-xl border-slate-200 hover:bg-slate-50 cursor-pointer text-slate-700 font-bold">Cancel</AlertDialogCancel>
+                            <AlertDialogCancel className="rounded-xl border-[#D4AF37]/40 hover:bg-slate-50 cursor-pointer text-[#4A0E17] font-bold">Cancel</AlertDialogCancel>
                             <AlertDialogAction 
                               className="rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-md cursor-pointer font-bold"
                               onClick={() => deleteParticipantMutation.mutate(p.id)}
@@ -549,8 +627,8 @@ export function AdminParticipantsView() {
             </TableBody>
           </Table>
         </CardContent>
-        <div className="p-4 border-t border-blue-50 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4 rounded-b-xl border-x-0 border-b-0">
-          <p className="text-sm text-slate-500 font-medium whitespace-nowrap">
+        <div className="p-4 border-t border-[#D4AF37]/20 bg-[#D4AF37]/5 flex flex-col sm:flex-row justify-between items-center gap-4 rounded-b-xl border-x-0 border-b-0">
+          <p className="text-sm text-[#6B4F43] font-medium whitespace-nowrap">
             Showing {totalItems === 0 ? 0 : startIndex + 1} to {Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems} entries
           </p>
           <Pagination className="justify-end w-auto mx-0">
@@ -558,7 +636,7 @@ export function AdminParticipantsView() {
               <PaginationItem>
                 <PaginationPrevious 
                   onClick={(e) => { e.preventDefault(); setCurrentPage(p => Math.max(1, p - 1)) }}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer text-slate-600 hover:text-primary"}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer text-[#6B4F43] hover:text-[#4A0E17]"}
                 />
               </PaginationItem>
               
@@ -567,7 +645,7 @@ export function AdminParticipantsView() {
                   <PaginationLink 
                     onClick={(e) => { e.preventDefault(); setCurrentPage(i + 1) }}
                     isActive={currentPage === i + 1}
-                    className={`cursor-pointer ${currentPage === i + 1 ? "border-primary text-primary hover:bg-blue-50" : "text-slate-600 hover:bg-blue-50 hover:text-primary"}`}
+                    className={`cursor-pointer ${currentPage === i + 1 ? "border-[#4A0E17] text-[#4A0E17] hover:bg-[#D4AF37]/10" : "text-[#6B4F43] hover:bg-[#D4AF37]/10 hover:text-[#4A0E17]"}`}
                   >
                     {i + 1}
                   </PaginationLink>
@@ -577,7 +655,7 @@ export function AdminParticipantsView() {
               <PaginationItem>
                 <PaginationNext 
                   onClick={(e) => { e.preventDefault(); setCurrentPage(p => Math.min(totalPages, p + 1)) }}
-                  className={currentPage === totalPages || totalPages === 0 ? "pointer-events-none opacity-50" : "cursor-pointer text-slate-600 hover:text-primary"}
+                  className={currentPage === totalPages || totalPages === 0 ? "pointer-events-none opacity-50" : "cursor-pointer text-[#6B4F43] hover:text-[#4A0E17]"}
                 />
               </PaginationItem>
             </PaginationContent>

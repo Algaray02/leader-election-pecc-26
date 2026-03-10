@@ -17,21 +17,31 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-72 bg-white border-r border-blue-100 flex-col h-full z-10 hidden md:flex shadow-2xl shadow-primary/5 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute -top-32 -left-32 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
-      
-      <div className="relative z-10 p-6 border-b border-blue-50 flex items-center space-x-4">
-        <div className="w-12 h-12 relative">
-          <Image src="/images/logo/pecc_logo.png" alt="PECC Logo" fill sizes="48px" className="object-contain" />
+    <aside className="w-72 flex-col h-full z-10 hidden md:flex relative overflow-hidden bg-gradient-to-b from-[#5D0F1D] via-[#4A0E17] to-[#2D060C] border-r border-[#D4AF37]/30 shadow-[4px_0_30px_rgba(0,0,0,0.4)]">
+      {/* Gold glow top */}
+      <div className="absolute -top-32 -left-32 w-64 h-64 bg-[#D4AF37]/20 rounded-full blur-3xl pointer-events-none" />
+      {/* Subtle dot pattern */}
+      <div
+        className="absolute inset-0 z-0 opacity-10 pointer-events-none"
+        style={{ backgroundImage: "radial-gradient(#D4AF37 1.5px, transparent 1.5px)", backgroundSize: "30px 30px" }}
+      />
+
+      {/* Header */}
+      <div className="relative z-10 p-6 border-b border-[#D4AF37]/30 flex items-center space-x-4">
+        <div className="w-12 h-12 bg-[#FDFBF7] rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(212,175,55,0.4)] border-b-4 border-[#D4AF37] relative overflow-hidden">
+          <Image src="/images/logo/pecc_logo.png" alt="PECC Logo" fill sizes="48px" className="object-contain p-1" />
         </div>
         <div>
-          <h1 className="font-extrabold text-sm leading-tight text-blue-900 uppercase tracking-wider">Admin Portal</h1>
-          <p className="text-xs text-primary font-bold tracking-wide">PECC Leader Election '26</p>
+          <h1 className="font-extrabold text-sm leading-tight text-[#D4AF37] uppercase tracking-widest drop-shadow-sm">
+            Admin Portal
+          </h1>
+          <p className="text-xs text-[#FDFBF7]/70 font-bold tracking-wide">PECC Leader Election '26</p>
         </div>
       </div>
-      <nav className="relative z-10 flex-1 overflow-y-auto py-8 px-5 space-y-1 bg-white/50 backdrop-blur-sm">
-        <ul className="space-y-4">
+
+      {/* Nav */}
+      <nav className="relative z-10 flex-1 overflow-y-auto py-8 px-5 space-y-1">
+        <ul className="space-y-3">
           {sidebarLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;
@@ -40,13 +50,18 @@ export function AdminSidebar() {
                 <Link
                   href={link.href}
                   className={cn(
-                    "flex items-center gap-4 px-4 py-4 rounded-2xl group transition-all duration-300 font-semibold shadow-sm w-full",
+                    "flex items-center gap-4 px-4 py-4 rounded-2xl group transition-all duration-300 font-semibold w-full",
                     isActive
-                      ? "bg-primary text-white shadow-lg shadow-primary/20 border-b-4 border-blue-800 scale-[1.02]"
-                      : "text-slate-600 hover:bg-blue-50 hover:text-primary"
+                      ? "bg-gradient-to-r from-[#D4AF37] to-[#F7B757] text-[#4A0E17] shadow-[0_4px_20px_rgba(212,175,55,0.35)] border-b-4 border-[#8B6508] scale-[1.02]"
+                      : "text-[#FDFBF7]/70 hover:bg-[#D4AF37]/10 hover:text-[#D4AF37]"
                   )}
                 >
-                  <Icon className={cn("w-5 h-5 shrink-0", isActive ? "text-white" : "text-slate-400 group-hover:text-primary transition-colors")} />
+                  <Icon
+                    className={cn(
+                      "w-5 h-5 shrink-0 transition-colors",
+                      isActive ? "text-[#4A0E17]" : "text-[#FDFBF7]/40 group-hover:text-[#D4AF37]"
+                    )}
+                  />
                   <span className="text-sm tracking-wide">{link.name}</span>
                 </Link>
               </li>
@@ -54,15 +69,17 @@ export function AdminSidebar() {
           })}
         </ul>
       </nav>
-      <div className="relative z-10 p-6 border-t border-blue-50 space-y-4 bg-white">
-        <button 
-          onClick={() => signOut({ callbackUrl: '/' })}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all duration-300 border border-red-100 group font-bold tracking-wide"
+
+      {/* Footer */}
+      <div className="relative z-10 p-6 border-t border-[#D4AF37]/30 space-y-4">
+        <button
+          onClick={() => signOut({ callbackUrl: "/" })}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3.5 text-[#4A0E17] bg-gradient-to-r from-[#D4AF37] to-[#F7B757] hover:from-[#F7B757] hover:to-[#D4AF37] rounded-xl transition-all duration-300 border border-[#8B6508] shadow-[0_4px_15px_rgba(212,175,55,0.25)] group font-bold tracking-wide"
         >
           <LogOut className="w-5 h-5 -scale-x-100 group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm">Log Out</span>
         </button>
-        <div className="mt-4 text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+        <div className="mt-2 text-center text-[10px] text-[#FDFBF7]/30 font-bold uppercase tracking-widest">
           © 2026 PECC. All rights reserved.
         </div>
       </div>
