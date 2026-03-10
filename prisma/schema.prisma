@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String     @id @default(cuid())
+  nim            String?    @unique
+  name           String
+  email          String     @unique
+  phone          String?
+  password       String     // Hashed
+  plainPassword  String?    // Real password for admin distribution
+  role           String     @default("POI") // "ADMIN", "OFFICER", or "POI"
+  hasVoted       Boolean    @default(false)
+  votedForId     String?
+  votedFor       Candidate? @relation(fields: [votedForId], references: [id])
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model Candidate {
+  id              String   @id @default(cuid())
+  candidateNumber Int      @unique
+  name            String
+  major           String?
+  vision          String
+  mission         String
+  imageUrl        String?
+  votes           User[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
