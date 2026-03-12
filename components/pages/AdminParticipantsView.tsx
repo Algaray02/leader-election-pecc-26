@@ -211,6 +211,7 @@ export function AdminParticipantsView() {
     e.preventDefault();
     createParticipantMutation.mutate(formData, {
       onSuccess: () => {
+        toast.success("Participant added successfully!");
         setIsAddOpen(false);
         setFormData({ name: "", nim: "", email: "", phone: "", password: "", role: "POI" });
       }
@@ -225,6 +226,7 @@ export function AdminParticipantsView() {
     );
     updateParticipantMutation.mutate({ id, data: updateData }, {
       onSuccess: () => {
+        toast.success("Participant updated successfully!");
         setEditingId(null);
         setFormData({ name: "", nim: "", email: "", phone: "", password: "", role: "POI" });
       }

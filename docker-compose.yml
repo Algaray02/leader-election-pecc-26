@@ -1,0 +1,39 @@
+services:
+  app:
+    build: .
+    container_name: leader-election-pecc-2026
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules # <--- TAMBAHKAN INI (Anonymous Volume)
+      - /app/.next        # <--- TAMBAHKAN INI JUGA
+    environment:
+      # URL koneksi database untuk digunakan oleh Prisma/Lucia/Drizzle di Next.js
+      - DATABASE_URL=postgresql://algaray:alfin270206@db:5432/le26-db
+    depends_on:
+      - db
+  
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare_tunnel
+    command: tunnel --url http://app:3000
+    restart: unless-stopped
+    depends_on:
+      - app
+
+  db:
+    image: postgres:18-alpine
+    container_name: le26_db
+    restart: unless-stopped
+    ports:
+      - "5432:5432" # Membuka akses agar Beekeeper bisa masuk
+    environment:
+      - POSTGRES_USER=algaray
+      - POSTGRES_PASSWORD=alfin270206
+      - POSTGRES_DB=le26-db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: # Agar data databasemu tidak hilang saat laptop dimatikan
