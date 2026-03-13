@@ -1,21 +1,29 @@
 FROM node:24-alpine
 
 WORKDIR /app
-
-# 1. Pasang dependencies dulu (biar cepat kalau ada cache)
 COPY package*.json ./
+COPY prisma ./prisma/
 RUN npm install
-
-# 2. Salin kodingan kamu
-COPY . .
-
-# 3. Jalankan Prisma Generate & Build Next.js
-# Kita lakukan ini SAAT BUILD image, bukan saat running container
 RUN npx prisma generate
+
+# --- STAGE 2: Builder ---
+FROM node:24-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 RUN npm run build
 
-# 4. Expose port (biasanya 3000)
-EXPOSE 3000
+# --- STAGE 3: Runner (Hanya ambil yang penting) ---
+FROM node:24-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
 
-# 5. Jalankan perintah start (Production)
+# Hanya copy file hasil build & dependencies produksi
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
+
+EXPOSE 3000
 CMD ["npm", "start"]
