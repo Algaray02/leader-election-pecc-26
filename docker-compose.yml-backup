@@ -12,7 +12,6 @@ services:
       # URL koneksi database untuk digunakan oleh Prisma/Lucia/Drizzle di Next.js
       - DATABASE_URL=postgresql://algaray:alfin270206@db:5432/le26-db
       - TOKEN_TUNNEL=${TOKEN_TUNNEL}
-      - NODE_ENV=production
     depends_on:
       - db
   

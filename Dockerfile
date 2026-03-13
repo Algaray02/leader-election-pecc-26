@@ -2,17 +2,20 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-# Salin file konfigurasi paket
-COPY package.json package-lock.json* ./
-
-# Install dependencies di dalam kontainer
+# 1. Pasang dependencies dulu (biar cepat kalau ada cache)
+COPY package*.json ./
 RUN npm install
 
-# Salin semua kode sumber
+# 2. Salin kodingan kamu
 COPY . .
 
-# Beritahu port yang akan digunakan
+# 3. Jalankan Prisma Generate & Build Next.js
+# Kita lakukan ini SAAT BUILD image, bukan saat running container
+RUN npx prisma generate
+RUN npm run build
+
+# 4. Expose port (biasanya 3000)
 EXPOSE 3000
 
-# Jalankan server development
-CMD ["npm", "run", "dev"]
+# 5. Jalankan perintah start (Production)
+CMD ["npm", "start"]

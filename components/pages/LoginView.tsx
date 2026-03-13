@@ -125,8 +125,8 @@ export function LoginView() {
         <div className="w-full max-w-lg lg:max-w-xl relative z-10 animate-in fade-in zoom-in-95 duration-500 delay-100">
            {/* Mobile header (hidden on desktop) */}
            <div className="lg:hidden mb-10 text-center flex flex-col items-center">
-              <div className="w-24 h-24 bg-gradient-to-br from-[#5D0F1D] to-[#2D060C] rounded-2xl flex items-center justify-center shadow-[0_10px_30px_rgba(93,15,29,0.3)] mb-5 border-b-4 border-[#D4AF37] relative overflow-hidden">
-                <Image src="/images/logo/pecc_logo.png" alt="PECC Logo" fill className="object-contain p-4 brightness-[200%] contrast-[120%]" />
+              <div className="w-24 h-24 bg-white rounded-2xl flex items-center justify-center shadow-[0_10px_30px_rgba(93,15,29,0.3)] mb-5 border-b-4 border-[#D4AF37] relative overflow-hidden">
+                <Image src="/images/logo/pecc_logo.png" alt="PECC Logo" fill className="object-contain" />
               </div>
               <h2 className="text-4xl font-playfair font-black text-[#4A0E17] tracking-tight drop-shadow-sm">PECC</h2>
               <p className="text-[#6B4F43] font-sans font-bold mt-2 flex items-center justify-center gap-1 uppercase tracking-widest text-sm">
