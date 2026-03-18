@@ -41,6 +41,7 @@ export function AdminCandidatesView() {
   const [formData, setFormData] = useState({
     name: "",
     candidateNumber: "",
+    major: "",
     vision: "",
     mission: "",
     imageUrl: "",
@@ -69,6 +70,7 @@ export function AdminCandidatesView() {
     setFormData({
       name: candidate.name || "",
       candidateNumber: candidate.candidateNumber?.toString() || "",
+      major: candidate.major || "",
       vision: candidate.vision || "",
       mission: candidate.mission || "",
       imageUrl: candidate.imageUrl || "",
@@ -143,7 +145,7 @@ export function AdminCandidatesView() {
             </div>
             <CardContent className="pt-6 flex flex-col flex-1">
                <h3 className="text-lg font-bold mb-1 text-[#4A0E17] group-hover:text-[#4A0E17] transition-colors">{candidate.name}</h3>
-               <p className="text-sm text-[#4A0E17] font-medium mb-4">Leader Candidate</p>
+               <p className="text-sm text-[#4A0E17] font-medium mb-4">{candidate.major}</p>
                
                <div className="space-y-3 mb-6 flex-1">
                  <div>
@@ -210,6 +212,10 @@ export function AdminCandidatesView() {
                                <Label htmlFor={`name-${candidate.id}`} className="text-[#4A0E17] font-bold">Name</Label>
                                <Input required id={`name-${candidate.id}`} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                              </div>
+                           </div>
+                           <div className="w-full space-y-2 md:col-span-2">
+                             <Label htmlFor={`major-${candidate.id}`} className="text-[#4A0E17] font-bold">Major</Label>
+                             <Input required id={`major-${candidate.id}`} value={formData.major} onChange={e => setFormData({...formData, major: e.target.value})} className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl" />
                            </div>
                            <div className="col-span-1 md:col-span-2 space-y-4">
                              <div className="space-y-2">

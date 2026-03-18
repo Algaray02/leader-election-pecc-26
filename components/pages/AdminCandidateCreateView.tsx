@@ -19,6 +19,7 @@ export function AdminCandidateCreateView() {
   const [formData, setFormData] = useState({
     name: "",
     candidateNumber: "",
+    major: "",
     vision: "",
     mission: "",
     imageUrl: "",
@@ -132,6 +133,11 @@ export function AdminCandidateCreateView() {
                   <div className="space-y-2">
                       <Label htmlFor="fullName" className="text-[#4A0E17] font-bold">Full Name</Label>
                       <Input required id="fullName" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Enter candidate full name" className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl h-12" />
+                  </div>
+
+                  <div className="space-y-2">
+                      <Label htmlFor="major" className="text-[#4A0E17] font-bold">Major</Label>
+                      <Input required id="major" value={formData.major} onChange={e => setFormData({...formData, major: e.target.value})} placeholder="Enter candidate major" className="border-[#D4AF37]/40 focus-visible:ring-[#4A0E17]/20 focus-visible:border-[#4A0E17] rounded-xl h-12" />
                   </div>
 
                   <div className="space-y-2">
