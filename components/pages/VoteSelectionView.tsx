@@ -50,7 +50,11 @@ export function VoteSelectionView() {
            <p className="font-bold text-lg animate-pulse text-[#4A0E17]">Loading candidates...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 justify-items-center">
+        <div className={`gap-8 lg:gap-10 justify-items-center ${
+          candidates.length === 2 
+            ? "flex flex-wrap justify-center" 
+            : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+        }`}>
           {candidates.map((c: any, index: number) => {
             const gradient = cardGradients[index % cardGradients.length];
             const formattedNumber = String(c.candidateNumber).padStart(2, '0');

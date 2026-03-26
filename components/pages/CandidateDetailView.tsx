@@ -106,8 +106,8 @@ export function CandidateDetailView({ candidateId }: { candidateId: string }) {
                       </div>
                       <h3 className="text-3xl font-extrabold text-[#4A0E17] tracking-tight">Vision</h3>
                    </div>
-                   <div className="bg-[#FFFDF9] rounded-[2rem] p-8 border border-[#D4AF37]/20 text-[#6B4F43] leading-relaxed text-xl italic relative shadow-sm">
-                      "{candidate.vision}"
+                   <div className="bg-[#FFFDF9] rounded-[2rem] p-8 border border-[#D4AF37]/20 text-[#6B4F43] leading-relaxed text-xl relative shadow-sm">
+                      {candidate.vision}
                    </div>
                 </section>
                 
