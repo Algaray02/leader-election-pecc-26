@@ -90,10 +90,10 @@ export function LoginView() {
                 Leader Election 2026
              </span>
           </div>
-          <h1 className="text-5xl lg:text-6xl xl:text-7xl font-playfair font-black leading-[1.1] mb-6 tracking-tight text-[#FDFBF7] drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
-            Empower Your Voice,<br />
-            <span className="text-[#D4AF37] relative inline-block mt-2 pr-4 italic">
-              Lead the Future.
+          <h1 className="text-5xl lg:text-6xl xl:text-7xl font-playfair font-black leading-[1.2] mb-10 tracking-tight text-[#FDFBF7] drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
+            The Throne Awaits:<br />
+            <span className="text-[#D4AF37] relative inline-block mt-6 pr-4 italic">
+              The Grand Journey to Crown a New Leader
               {/* Elegant underline */}
               <div className="absolute bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent -z-10"></div>
             </span>
