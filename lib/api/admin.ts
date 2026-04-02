@@ -10,6 +10,8 @@ export const AdminAPI = {
   createParticipant: (data: any) => api.post("/admin/participants", data),
   updateParticipant: (id: string, data: any) => api.patch(`/admin/participants/${id}`, data),
   deleteParticipant: (id: string) => api.delete(`/admin/participants/${id}`),
+  sendEmail: (id: string) => api.post("/admin/participants/send-email", { id }),
+  sendEmailsToAll: () => api.post("/admin/participants/send-email", { all: true }),
 
   // Candidates
   getCandidates: () => api.get("/admin/candidates"),

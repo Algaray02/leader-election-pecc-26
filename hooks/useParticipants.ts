@@ -50,3 +50,16 @@ export const useDeleteParticipant = () => {
     onSuccess: () => invalidateParticipantQueries(queryClient),
   });
 };
+
+export const useSendParticipantEmail = () => {
+  return useMutation({
+    mutationFn: (id: string) => AdminAPI.sendEmail(id),
+  });
+};
+
+export const useSendEmailsToAll = () => {
+  return useMutation({
+    mutationFn: () => AdminAPI.sendEmailsToAll(),
+  });
+};
+

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useParticipants, useDeleteParticipant, useCreateParticipant, useUpdateParticipant, adminParticipantKeys } from "@/hooks/useParticipants";
+import { useParticipants, useDeleteParticipant, useCreateParticipant, useUpdateParticipant, useSendParticipantEmail, useSendEmailsToAll, adminParticipantKeys } from "@/hooks/useParticipants";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AdminAPI } from "@/lib/api/admin";
 import { adminQueryKeys } from "@/hooks/useAdmin";
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Download, Upload, UserPlus, FileEdit, Trash2, Filter, ArrowUpDown, RefreshCw, Eye, EyeOff, Users, Vote, Clock } from "lucide-react";
+import { Search, Download, Upload, UserPlus, FileEdit, Trash2, Filter, ArrowUpDown, RefreshCw, Eye, EyeOff, Users, Vote, Clock, Mail, Send } from "lucide-react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import {
@@ -85,6 +85,8 @@ export function AdminParticipantsView() {
   const deleteParticipantMutation = useDeleteParticipant();
   const createParticipantMutation = useCreateParticipant();
   const updateParticipantMutation = useUpdateParticipant();
+  const sendEmailMutation = useSendParticipantEmail();
+  const sendAllEmailsMutation = useSendEmailsToAll();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -288,6 +290,21 @@ export function AdminParticipantsView() {
               accept=".xlsx,.xls,.csv" 
               onChange={handleImportExcel} 
             />
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                 const promise = sendAllEmailsMutation.mutateAsync();
+                 toast.promise(promise, {
+                   loading: "Sending credentials to all users...",
+                   success: (data: any) => `Successfully sent emails to ${data?.data?.count || 'all'} users!`,
+                   error: (err) => `Failed to send to all: ${err.message || "Unknown error"}`
+                 });
+              }} 
+              disabled={sendAllEmailsMutation.isPending}
+              className="cursor-pointer text-[#4A0E17] border-[#D4AF37]/40 hover:bg-[#D4AF37]/10 flex-1 sm:flex-none"
+            >
+              <Send className="w-4 h-4 mr-2" /> Send All Emails
+            </Button>
           </div>
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
@@ -597,6 +614,22 @@ export function AdminParticipantsView() {
                           </form>
                         </DialogContent>
                       </Dialog>
+
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="cursor-pointer text-[#4A0E17] hover:bg-[#D4AF37]/20 hover:text-[#5D0F1D]"
+                        onClick={() => {
+                          const promise = sendEmailMutation.mutateAsync(p.id);
+                          toast.promise(promise, {
+                            loading: `Sending credentials to ${p.name}...`,
+                            success: `Credentials sent successfully to ${p.name}!`,
+                            error: (err) => `Failed to send email: ${err.message || "Unknown error"}`
+                          });
+                        }}
+                      >
+                        <Mail className="w-4 h-4" />
+                      </Button>
 
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
