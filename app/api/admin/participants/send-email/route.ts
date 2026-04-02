@@ -4,9 +4,8 @@ import { Resend } from "resend";
 import { VotingCredentialsEmail } from "@/components/email/VotingCredentials";
 import React from "react";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: Request) {
+  const resend = new Resend(process.env.RESEND_API_KEY || "missing_key");
   try {
     const { id, all } = await req.json();
 
