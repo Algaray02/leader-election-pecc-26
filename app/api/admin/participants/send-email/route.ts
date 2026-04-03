@@ -16,12 +16,7 @@ export async function POST(req: Request) {
     let participants = [];
     if (all) {
       participants = await prisma.user.findMany({
-        where: { 
-          AND: [
-            { email: { not: null } },
-            { email: { not: "" } }
-          ]
-        } as any,
+        where: { email: { contains: "@" } },
         select: { id: true, nim: true, name: true, email: true, plainPassword: true }
       });
     } else {
@@ -53,10 +48,14 @@ export async function POST(req: Request) {
       }),
     }));
 
-    // Split payload to chunks of 50 to respect Resend batch limits (max 50-100 per chunk typically)
-    const chunkSize = 50;
+    // Split payload to chunks of 100 (Resend allows up to 100 per batch call)
+    const chunkSize = 100;
     const finalData = [];
     for (let i = 0; i < emailsPayload.length; i += chunkSize) {
+      if (i > 0) {
+        // Delay 1s between batches to avoid rate limits
+        await new Promise(r => setTimeout(r, 1000));
+      }
       const chunk = emailsPayload.slice(i, i + chunkSize);
       const { data, error } = await resend.batch.send(chunk);
       if (error) {
