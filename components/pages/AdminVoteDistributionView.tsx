@@ -142,7 +142,10 @@ export function AdminVoteDistributionView() {
 
                 {/* Candidate Name */}
                 <div style={{ textAlign: 'center', marginTop: '12px' }}>
-                  <h4 style={{ fontWeight: 700, color: '#4A0E17', fontSize: 'clamp(13px, 1.5vw, 16px)', margin: 0, lineHeight: 1.3 }}>
+                  <div style={{ fontSize: '16px', color: '#6B4F43', fontWeight: 600, marginBottom: '2px' }}>
+                    {candidate.votes} Votes
+                  </div>
+                  <h4 style={{ fontWeight: 1000, color: '#4A0E17', fontSize: 'clamp(13px, 1.5vw, 16px)', margin: 0, lineHeight: 1.3 }}>
                     {candidate.name}
                   </h4>
                 </div>
