@@ -1,12 +1,34 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { useAdmin } from "@/hooks/useAdmin";
-import { ArrowLeft, Loader2, User } from "lucide-react";
+import { ArrowLeft, Loader2, User, Maximize, Minimize } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function AdminVoteDistributionView() {
   const router = useRouter();
   const { stats, isLoading } = useAdmin();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   if (isLoading) {
     return (
@@ -27,7 +49,7 @@ export function AdminVoteDistributionView() {
   const MIN_BAR_VH = 8;
 
   return (
-    <div style={{ minHeight: '100vh', width: '100%', background: '#FFFDF9', display: 'flex', flexDirection: 'column' }}>
+    <div ref={containerRef} style={{ minHeight: '100vh', width: '100%', background: '#FFFDF9', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{
         width: '100%',
@@ -52,6 +74,14 @@ export function AdminVoteDistributionView() {
           <h2 style={{ fontSize: '22px', fontWeight: 900, color: '#4A0E17', margin: 0, lineHeight: 1 }}>Vote Distribution</h2>
           <p style={{ fontSize: '12px', color: '#6B4F43', margin: '4px 0 0', fontWeight: 500 }}>Real-time candidate performance</p>
         </div>
+        <div style={{ flex: 1 }} />
+        <button
+          onClick={toggleFullscreen}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#4A0E17', fontWeight: 700, fontSize: '13px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.4)', borderRadius: '8px', cursor: 'pointer', padding: '8px 16px', transition: 'all 0.2s' }}
+        >
+          {isFullscreen ? <Minimize style={{ width: 18, height: 18 }} /> : <Maximize style={{ width: 18, height: 18 }} />}
+          {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+        </button>
       </div>
 
       {/* Chart Area — items aligned to bottom */}
