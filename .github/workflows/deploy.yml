@@ -1,21 +1,109 @@
-name: Deploy to VPS
+name: Deploy to RupaCloud (Next.js)
 
 on:
   push:
-    branches:
-      - le26-theme # Jalankan otomatis tiap push ke branch main
+    branches: [le26-theme]
+    paths-ignore:
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+concurrency:
+  group: rupacloud-deploy-${{ github.repository }}
+  cancel-in-progress: true
 
 jobs:
   deploy:
+    name: Auto-Deploy to RupaCloud
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          command_timeout: 20m
-          script: |
-            cd ~/leader-election-pecc-26
-            git pull origin le26-theme
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Trigger RupaCloud Build & Deploy
+        env:
+          DEPLOY_TOKEN: ${{ secrets.RUPACLOUD_DEPLOY_TOKEN }}
+          ORDER_ID: 'cf898b97-d409-4c4b-b24c-1d9d240bf40b'
+          BASE_DOMAIN: 'rupacloud.web.id'
+        run: |
+          bash << 'EOF'
+          set -e
+          echo "📡 Menghubungi RupaCloud Builder..."
+          DEPLOY_URL="https://$BASE_DOMAIN/api/customer/orders/$ORDER_ID/deploy-webhook"
+
+          RESPONSE=$(curl -s -X POST "$DEPLOY_URL" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $DEPLOY_TOKEN" \
+            -d "{\"repo\":\"${{ github.repository }}\",\"branch\":\"le26-theme\",\"commitSha\":\"${{ github.sha }}\",\"actor\":\"${{ github.actor }}\",\"frameworkId\":\"nextjs\",\"port\":3000}")
+
+          JOB_ID=$(echo "$RESPONSE" | grep -o '"jobId":"[^"]*' | cut -d'"' -f4)
+          if [ -z "$JOB_ID" ]; then
+            echo "❌ Gagal memicu deployment di RupaCloud:"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "✔ Deployment berhasil dipicu (Job ID: $JOB_ID)."
+          echo "📊 Memantau proses build & deploy secara live..."
+
+          POLL_URL="https://$BASE_DOMAIN/api/customer/orders/$ORDER_ID/deploy?jobId=$JOB_ID"
+          LAST_COUNT=0
+          FAIL_COUNT=0
+          while true; do
+            STATUS_RES=$(curl -s -H "Authorization: Bearer $DEPLOY_TOKEN" "$POLL_URL")
+            STATUS=$(echo "$STATUS_RES" | grep -o '"status":"[^"]*' | cut -d'"' -f4)
+
+            API_ERR=$(echo "$STATUS_RES" | jq -r '.error // empty' 2>/dev/null || true)
+            if [ -n "$API_ERR" ]; then
+              echo "⚠️ Kendala polling ($API_ERR). Mencoba kembali..."
+              FAIL_COUNT=$((FAIL_COUNT+1))
+              if [ "$FAIL_COUNT" -gt 15 ]; then
+                echo "❌ Gagal memantau deployment karena otorisasi atau koneksi bermasalah."
+                exit 1
+              fi
+              sleep 2
+              continue
+            fi
+            FAIL_COUNT=0
+
+            TOTAL=$(echo "$STATUS_RES" | jq -r '.job.logs | length' 2>/dev/null || echo 0)
+            if [ "$TOTAL" -gt "$LAST_COUNT" ]; then
+              echo "$STATUS_RES" | jq -r --argjson last "$LAST_COUNT" '.job.logs[$last:] | .[] | "[" + .timestamp + "] " + .text' 2>/dev/null || true
+              LAST_COUNT=$TOTAL
+            fi
+
+            if [ "$STATUS" = "SUCCESS" ]; then
+              echo "🎉 Deployment sukses diselesaikan!"
+              break
+            elif [ "$STATUS" = "FAILED" ]; then
+              echo "❌ Deployment gagal!"
+              exit 1
+            fi
+            sleep 2
+          done
+          EOF
+
+      - name: 📊 Ringkasan Status Deployment (RuPa Cloud Summary)
+        if: success()
+        run: |
+          cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+          ## ☁️ RuPa Cloud - Ringkasan Deployment
+          ### ✅ Deployment Berhasil!
+          Aplikasi **Next.js** berhasil di-build dan aktif berjalan di container RuPa Cloud.
+
+          | Parameter | Informasi |
+          | :--- | :--- |
+          | 📦 Framework | Next.js |
+          | 🌿 Branch | le26-theme |
+          | 🔖 Commit SHA | ${{ github.sha }} |
+          | 👤 Dipicu Oleh | ${{ github.actor }} |
+          | ⏱️ Waktu Selesai | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |
+          EOF
+
+      - name: ⚠️ Ringkasan Kegagalan Deployment
+        if: failure()
+        run: |
+          cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+          ## ☁️ RuPa Cloud - Ringkasan Deployment
+          ### ❌ Deployment Gagal!
+          Terjadi kendala saat proses deployment. Silakan periksa log step **🚀 Trigger RupaCloud Build & Deploy** di atas untuk melihat detail kesalahannya.
+          EOF
