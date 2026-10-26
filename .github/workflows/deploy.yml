@@ -22,7 +22,7 @@ jobs:
       - name: 🚀 Trigger RupaCloud Build & Deploy
         env:
           DEPLOY_TOKEN: ${{ secrets.RUPACLOUD_DEPLOY_TOKEN }}
-          ORDER_ID: 'cf898b97-d409-4c4b-b24c-1d9d240bf40b'
+          ORDER_ID: '3cbda2c3-8eb7-4953-80f4-a234718473e6'
           BASE_DOMAIN: 'rupacloud.web.id'
         run: |
           bash << 'EOF'
@@ -33,7 +33,7 @@ jobs:
           RESPONSE=$(curl -s -X POST "$DEPLOY_URL" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $DEPLOY_TOKEN" \
-            -d "{\"repo\":\"${{ github.repository }}\",\"branch\":\"main\",\"commitSha\":\"${{ github.sha }}\",\"actor\":\"${{ github.actor }}\",\"frameworkId\":\"nextjs\",\"port\":3000}")
+            -d "{\"repo\":\"${{ github.repository }}\",\"branch\":\"main\",\"commitSha\":\"${{ github.sha }}\",\"actor\":\"${{ github.actor }}\",\"frameworkId\":\"nextjs\",\"port\":3000,\"rootDirectory\":\"./\"}")
 
           JOB_ID=$(echo "$RESPONSE" | grep -o '"jobId":"[^"]*' | cut -d'"' -f4)
           if [ -z "$JOB_ID" ]; then
